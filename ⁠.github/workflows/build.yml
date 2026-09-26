@@ -3,6 +3,7 @@ name: Build Garmin Watchface (.iq)
 on:
   push:
     branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -18,20 +19,21 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
-      - name: Setup Garmin Connect IQ SDK & Build Package
+      - name: Setup Garmin Connect IQ SDK & Build
         run: |
           mkdir -p ciq-sdk
-          curl -L -o sdk.zip https://developer.garmin.com/downloads/connect-iq/sdks/connectiq-sdk-lin-4.1.7-2022-11-21-5a3311090.zip
+          curl -L -o sdk.zip https://developer.garmin.com/downloads/connect-iq/sdks/connectiq-sdk-lin-6.4.2-2024-01-10-58473c9b7.zip
           unzip -q sdk.zip -d ciq-sdk
           
-          openssl genrsa -out developer_key.pem 4096
+          openssl genrsa -out developer_key.pem 4090
           openssl pkcs8 -topk8 -inform PEM -outform DER -in developer_key.pem -out developer_key.der -nocrypt
-
-          ./ciq-sdk/bin/monkeyc -e -o release.iq -m manifest.xml -f monkey.jungle -y developer_key.der
+          
+          ./ciq-sdk/bin/monkeyc -e -o release.iq -f monkey.jungle -y developer_key.der -d instinct2solar
 
       - name: Upload .iq Artifact
         uses: actions/upload-artifact@v3
         with:
           name: Garmin-IQ-Package
           path: release.iq
+
           
